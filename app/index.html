@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html lang="en" ng-app="liveHaasApp" class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html lang="en" ng-app="liveHaasApp" class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html lang="en" ng-app="liveHaasApp" class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html lang="en" ng-app="brighterTmrwApp" class="no-js">
+<!--<![endif]-->
+  <head>
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <title>Brighter Tomorrows</title>
+
+      <link rel="shortcut icon" href="favicon.ico" />
+      <meta name="description" content="">
+      <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no"/>
+      <meta name="theme-color" content="#9c27b0">
+      <!-- Stylesheets -->
+      <!-- Custom CSS  -->
+      <link href="min/plugin-min.css" type="text/css" rel="stylesheet">
+      <link href="css/style.css" type="text/css" rel="stylesheet" >
+      <!-- Materialize CSS -->
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/css/materialize.min.css">
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+      <link rel="stylesheet" href="app.css">
+      <!-- In production use:
+      <script src="//ajax.googleapis.com/ajax/libs/angularjs/x.x.x/angular.min.js"></script>
+      -->
+
+      <!--Bower Components-->
+      <script type="text/javascript" src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+      <script src="bower_components/html5-boilerplate/dist/js/vendor/modernizr-2.8.3.min.js"></script>
+      <!-- <script src="bower_components/lodash/lodash.min.js"></script> -->
+      <script src="bower_components/angular/angular.js"></script>
+      <script src="bower_components/angular-route/angular-route.js"></script>
+      <script src="bower_components/angular-ui-router/release/angular-ui-router.min.js"></script>
+      <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+      <!--App-->
+      <script src="app.js"></script>
+      <!--Other components and javascript files-->
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/js/materialize.min.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular-materialize/0.2.1/angular-materialize.min.js"></script>
+
+      <!-- Your app -->
+
+      <!-- <script src="js/custom.js"></script> -->
+      <!-- Custom Scripts-->
+      <script src="min/plugin-min.js"></script>
+      <script src="min/custom-min.js"></script>
+
+
+      <script src="components/version/version.js"></script>
+      <script src="components/version/version-directive.js"></script>
+      <script src="components/version/interpolate-filter.js"></script>
+      <!--Services-->
+      <!-- <script src="services/liveHausApi.js"></script> -->
+      <!--Landing View Controllers-->
+      <script src="navigation/navigation.js"></script>
+      <script src="home/home.js"></script>
+      <!--View Controllers-->
+
+      <!--Directives-->
+
+  </head>
+  <body id="top" class="scrollspy">
+    <!--[if lt IE 7]>
+        <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+    <![endif]-->
+
+    <div ui-view></div>
+
+  </body>
+</html>
