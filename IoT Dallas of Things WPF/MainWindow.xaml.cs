@@ -39,26 +39,12 @@ namespace IoT_Dallas_of_Things_WPF
 
             mySerialPort.DataReceived += new SerialDataReceivedEventHandler(DataReceivedHandler);
 
-            mySerialPort.Open();
+            //mySerialPort.Open();
 
             InitializeComponent();
 
             //disable text-box UI in preperation for first scan
-            RFIDTextBlock.Visibility = Visibility.Hidden;
-            FNameTextBox.Visibility = Visibility.Hidden;
-            LNameTextBox.Visibility = Visibility.Hidden;
-            PhoneTextBox.Visibility = Visibility.Hidden;
-            AddressTextBox.Visibility = Visibility.Hidden;
-            BusNumTextBox.Visibility = Visibility.Hidden;
-
-            TagLabel.Visibility = Visibility.Hidden;
-            BusLabel.Visibility = Visibility.Hidden;
-            FirstNameLabel.Visibility = Visibility.Hidden;
-            LastNameLabel.Visibility = Visibility.Hidden;
-            PhoneLabel.Visibility = Visibility.Hidden;
-            AddressLabel.Visibility = Visibility.Hidden;
-
-            CheckInButton.Visibility = Visibility.Hidden;
+            HideElements(true);
             
         }
 
@@ -132,29 +118,11 @@ namespace IoT_Dallas_of_Things_WPF
 
         private void scan_Click(object sender, RoutedEventArgs e)
         {
-            GreetingTextBlock.Visibility = Visibility.Hidden;
-
-            RFIDTextBlock.Visibility = Visibility.Visible;
+            GreetingTextBlock.Visibility = Visibility.Hidden;            
             RFIDTextBlock.IsEnabled = false;
-            FNameTextBox.Visibility = Visibility.Visible;
-            LNameTextBox.Visibility = Visibility.Visible;
-            PhoneTextBox.Visibility = Visibility.Visible;
-            AddressTextBox.Visibility = Visibility.Visible;
-            BusNumTextBox.Visibility = Visibility.Visible;
-
-            TagLabel.Visibility = Visibility.Visible;
-            BusLabel.Visibility = Visibility.Visible;
-            FirstNameLabel.Visibility = Visibility.Visible;
-            LastNameLabel.Visibility = Visibility.Visible;
-            PhoneLabel.Visibility = Visibility.Visible;
-            AddressLabel.Visibility = Visibility.Visible;
-
-            CheckInButton.Visibility = Visibility.Visible;
+            HideElements(false);
         }
-
-
-
-
+        
         public static string getBetween(string strSource, string strStart, string strEnd)
         {
             int Start, End;
@@ -173,22 +141,28 @@ namespace IoT_Dallas_of_Things_WPF
         private void CheckIn_Click(object sender, RoutedEventArgs e)
         {
             GreetingTextBlock.Visibility = Visibility.Visible;
+            HideElements(true);            
+        }
 
-            RFIDTextBlock.Visibility = Visibility.Hidden;
-            FNameTextBox.Visibility = Visibility.Hidden;
-            LNameTextBox.Visibility = Visibility.Hidden;
-            PhoneTextBox.Visibility = Visibility.Hidden;
-            AddressTextBox.Visibility = Visibility.Hidden;
-            BusNumTextBox.Visibility = Visibility.Hidden;
+        private void HideElements(bool hideElements)
+        {
+            var hideOrShowElement = hideElements ? Visibility.Hidden : Visibility.Visible;
 
-            TagLabel.Visibility = Visibility.Hidden;
-            BusLabel.Visibility = Visibility.Hidden;
-            FirstNameLabel.Visibility = Visibility.Hidden;
-            LastNameLabel.Visibility = Visibility.Hidden;
-            PhoneLabel.Visibility = Visibility.Hidden;
-            AddressLabel.Visibility = Visibility.Hidden;
+            RFIDTextBlock.Visibility = hideOrShowElement;
+            FNameTextBox.Visibility = hideOrShowElement;
+            LNameTextBox.Visibility = hideOrShowElement;
+            PhoneTextBox.Visibility = hideOrShowElement;
+            AddressTextBox.Visibility = hideOrShowElement;
+            BusNumTextBox.Visibility = hideOrShowElement;
 
-            CheckInButton.Visibility = Visibility.Hidden;
+            TagLabel.Visibility = hideOrShowElement;
+            BusLabel.Visibility = hideOrShowElement;
+            FirstNameLabel.Visibility = hideOrShowElement;
+            LastNameLabel.Visibility = hideOrShowElement;
+            PhoneLabel.Visibility = hideOrShowElement;
+            AddressLabel.Visibility = hideOrShowElement;
+
+            CheckInButton.Visibility = hideOrShowElement;
         }
     }
 }
