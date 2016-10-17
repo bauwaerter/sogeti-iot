@@ -1,0 +1,31 @@
+﻿<Controls:MetroWindow x:Class="IoT_Dallas_of_Things_WPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        Title="SmartBag" Height="768" Width="1000"
+        ResizeMode="NoResize"  Cursor="None" HorizontalAlignment="Center" VerticalAlignment="Center" BorderThickness="4" WindowStyle="None">
+    
+    <Grid Margin="0,0,0,45">
+        <Label Content="Smart Tag Number:" x:Name="TagLabel" FontSize="40" Margin="0,50,302,580" HorizontalAlignment="Right" Width="376"/>
+        <Label Content="Bus Number:" x:Name="BusLabel" FontSize="26" Margin="306,221,530,428" Width="158"/>
+        <Label Content="First Name:" x:Name="FirstNameLabel" FontSize="26" Margin="320,287,534,361" />
+        <Label Content="Last Name:" x:Name="LastNameLabel" FontSize="26" Margin="328,347,530,300" />
+        <Label Content="Phone Number:" x:Name="PhoneLabel" FontSize="26" Margin="272,399,530,251"/>
+        <Label Content="Address:" x:Name="AddressLabel" FontSize="26" Margin="350,457,534,194" RenderTransformOrigin="1.298,0.444"/>
+
+        <TextBlock x:Name="GreetingTextBlock" FontSize="50" Text="Please Scan An RFID Tag" Margin="224,200,222,418"/>
+        <Label x:Name="RFIDTextBlock" FontSize="36" Content="82003C84DDE7" Margin="367,109,368,529" />
+        <TextBox x:Name="BusNumTextBox" FontSize="24" Text="bus #" Height="42" Width="272" Margin="0,0,253,431" BorderThickness="0 0 0 1" HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
+        <TextBox x:Name="FNameTextBox" FontSize="24" Text="john" Height="42" Width="272" Margin="0,0,253,365" BorderThickness="0 0 0 1" HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
+        <TextBox x:Name="LNameTextBox" FontSize="24" Text="doe" Height="42" Width="272" Margin="0,0,253,305" BorderThickness="0 0 0 1" HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
+        <TextBox x:Name="PhoneTextBox" FontSize="24" Text="address"  Height="42" Width="272" Margin="0,0,253,195" BorderThickness="0 0 0 1" HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
+        <TextBox x:Name="AddressTextBox" FontSize="24" Text="682-555-3412"  Height="42" Width="272" Margin="0,0,253,251" BorderThickness="0 0 0 1" HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
+
+        <Button Margin="371,561,371,81" x:Name="CheckInButton" FontSize="18" Content="Check In Bag" Click="CheckIn_Click" />
+
+        <!-- TEST BUTTONS -->
+        <Button Margin="10,9,898,656" Content="Scan Test" Click="scan_Click" />
+        <Button Margin="10,43,898,621" Content="Create Device" Click="create_Click"/>
+        <Button Margin="10,78,898,590" Content="Update Device" Click="update_Click"/>
+    </Grid>
+</Controls:MetroWindow>
