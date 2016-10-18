@@ -20,6 +20,7 @@ using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using RestSharp;
 
 namespace IoT_Dallas_of_Things_WPF
 {
@@ -70,7 +71,8 @@ namespace IoT_Dallas_of_Things_WPF
         {
             //Client ID: paNHXLgIJxzQItbjHOm3VWZEqJ3soMAd
             //Client Secret: SbFM86Kj69jFj6eR
-            var token = "Bearer 2|DSWYVsDeY98PGFVAlrmgL4VKMkcA";
+            var token = GetRefreshToken();
+
             var client = new HttpClient();
             client.BaseAddress = new Uri("https://api.us1.covisint.com/");
 
@@ -78,7 +80,7 @@ namespace IoT_Dallas_of_Things_WPF
             client.DefaultRequestHeaders.Accept.Clear();
 
             client.DefaultRequestHeaders.Add("Accept", "application/vnd.com.covisint.platform.device.v2+json");
-            client.DefaultRequestHeaders.Add("Authorization", token);
+            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "device/v3/tasks/createDeviceFromTemplate?deviceTemplateId=2ccb21ac-dc8c-44cd-a9a7-5b5ddf87fd43");
             HttpResponseMessage response = await client.SendAsync(request);
@@ -90,6 +92,19 @@ namespace IoT_Dallas_of_Things_WPF
             deviceID = json["id"].Value<string>();
         }
 
+        private string GetRefreshToken()
+        {
+            var client = new RestClient("https://api.us1.covisint.com/oauth/v3/token");
+            var request = new RestRequest(Method.POST);            
+            request.AddHeader("cache-control", "no-cache");
+            request.AddHeader("authorization", "Basic cGFOSFhMZ0lKeHpRSXRiakhPbTNWV1pFcUozc29NQWQ6U2JGTTg2S2o2OWpGajZlUg==");
+            request.AddHeader("content-type", "application/x-www-form-urlencoded");
+            request.AddParameter("application/x-www-form-urlencoded", "grant_type=client_credentials", ParameterType.RequestBody);
+            IRestResponse response = client.Execute(request);
+            var access_token = JObject.Parse(response.Content.ToString())["access_token"].ToString();
+           
+            return access_token;
+        }
 
         private async void update_Click(object sender, RoutedEventArgs e)
         {
