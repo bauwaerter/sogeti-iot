@@ -70,7 +70,7 @@ namespace IoT_Dallas_of_Things_WPF
         {
             //Client ID: paNHXLgIJxzQItbjHOm3VWZEqJ3soMAd
             //Client Secret: SbFM86Kj69jFj6eR
-            var token = "Bearer 2|DSWYVsDeY98PGFVAlrmgL4VKMkcA";
+            var token = "Bearer 2|Pzp4ikQU3I7xyS3DVNp8W2rbGcd2";
             var client = new HttpClient();
             client.BaseAddress = new Uri("https://api.us1.covisint.com/");
 
@@ -93,22 +93,22 @@ namespace IoT_Dallas_of_Things_WPF
 
         private async void update_Click(object sender, RoutedEventArgs e)
         {
-            deviceID = "4c295e3f-2b97-47eb-9798-10f92058418e";
+            //deviceID = "4c295e3f-2b97-47eb-9798-10f92058418e";
 
-            var token = "Bearer 2|DSWYVsDeY98PGFVAlrmgL4VKMkcA";
+            var token = "Bearer 2|Pzp4ikQU3I7xyS3DVNp8W2rbGcd2";
             var client = new HttpClient();
             client.BaseAddress = new Uri("https://api.us1.covisint.com/");
 
             client.DefaultRequestHeaders.Accept.Clear();
 
-            client.DefaultRequestHeaders.Add("Accept", "application/vnd.com.covisint.platform.device.v2+json;fetchattributetypes=true;fetcheventtemplates=true;fetchcommandtemplates=true");
             client.DefaultRequestHeaders.Add("Authorization", token);
+            client.DefaultRequestHeaders.Add("Accept", "application/vnd.com.covisint.platform.device.v2+json");
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, "/device/v3/devices/" + deviceID);
 
             //json["attributeTypeId"] = "22";
 
-            request.Content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
+            request.Content = new StringContent(json.ToString(), Encoding.UTF8, "application/vnd.com.covisint.platform.device.v2+json");
 
 
             HttpResponseMessage response = await client.SendAsync(request);
