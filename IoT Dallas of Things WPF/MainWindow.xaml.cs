@@ -18,6 +18,8 @@ using System.Net.Http;
 using System.IO;
 using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace IoT_Dallas_of_Things_WPF
 {
@@ -26,6 +28,9 @@ namespace IoT_Dallas_of_Things_WPF
     /// </summary>
     public partial class MainWindow
     {
+        string deviceID;
+        JObject json;
+
         public MainWindow()
         {
             SerialPort mySerialPort = new SerialPort("COM5");
@@ -45,7 +50,7 @@ namespace IoT_Dallas_of_Things_WPF
 
             //disable text-box UI in preperation for first scan
             HideElements(true);
-            
+
         }
 
         private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
@@ -66,7 +71,7 @@ namespace IoT_Dallas_of_Things_WPF
         {
             //Client ID: paNHXLgIJxzQItbjHOm3VWZEqJ3soMAd
             //Client Secret: SbFM86Kj69jFj6eR
-            var token = "Bearer 2|sRATc5iweO8FUfjd4bQQjw4ACMaL";
+            var token = "Bearer 2|DSWYVsDeY98PGFVAlrmgL4VKMkcA";
             var client = new HttpClient();
             client.BaseAddress = new Uri("https://api.us1.covisint.com/");
 
@@ -82,17 +87,16 @@ namespace IoT_Dallas_of_Things_WPF
             response.EnsureSuccessStatusCode();
             string responseBody = await response.Content.ReadAsStringAsync();
 
-            responseBody = responseBody.Replace("\"", "").Replace(@"\", "");
-
-            string tagID = getBetween(responseBody, "id:", ",");
+            json = JObject.Parse(responseBody);
+            deviceID = json["id"].Value<string>();
         }
 
 
         private async void update_Click(object sender, RoutedEventArgs e)
         {
-            string tagID = "4c295e3f-2b97-47eb-9798-10f92058418e";
+            deviceID = "4c295e3f-2b97-47eb-9798-10f92058418e";
 
-            var token = "Bearer 2|sRATc5iweO8FUfjd4bQQjw4ACMaL";
+            var token = "Bearer 2|DSWYVsDeY98PGFVAlrmgL4VKMkcA";
             var client = new HttpClient();
             client.BaseAddress = new Uri("https://api.us1.covisint.com/");
 
@@ -101,15 +105,14 @@ namespace IoT_Dallas_of_Things_WPF
             client.DefaultRequestHeaders.Add("Accept", "application/vnd.com.covisint.platform.device.v2+json;fetchattributetypes=true;fetcheventtemplates=true;fetchcommandtemplates=true");
             client.DefaultRequestHeaders.Add("Authorization", token);
 
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "/device/v3/devices/" + tagID);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, "/device/v3/devices/" + deviceID);
+
+            //json["attributeTypeId"] = "22";
+
+            request.Content = new StringContent(json.ToString(), Encoding.UTF8, "application/json");
+
+
             HttpResponseMessage response = await client.SendAsync(request);
-
-            //response = await client.PostAsync("device/" + tagID, requestContent);
-
-            //var requestContent = new FormUrlEncodedContent(new[] {
-            //new KeyValuePair<string, string>("00887147-365e-46a7-8c49-965fe4fb784c", "1"),
-            //    });
-            //HttpResponseMessage response = await client.PostAsync("/devices/" + tagID, requestContent);
 
 
 
@@ -118,11 +121,11 @@ namespace IoT_Dallas_of_Things_WPF
 
         private void scan_Click(object sender, RoutedEventArgs e)
         {
-            GreetingTextBlock.Visibility = Visibility.Hidden;            
+            GreetingTextBlock.Visibility = Visibility.Hidden;
             RFIDTextBlock.IsEnabled = false;
             HideElements(false);
         }
-        
+
         public static string getBetween(string strSource, string strStart, string strEnd)
         {
             int Start, End;
@@ -141,7 +144,7 @@ namespace IoT_Dallas_of_Things_WPF
         private void CheckIn_Click(object sender, RoutedEventArgs e)
         {
             GreetingTextBlock.Visibility = Visibility.Visible;
-            HideElements(true);            
+            HideElements(true);
         }
 
         private void HideElements(bool hideElements)
