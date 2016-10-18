@@ -50,7 +50,6 @@ namespace IoT_Dallas_of_Things_WPF
 
             //disable text-box UI in preperation for first scan
             HideElements(true);
-
         }
 
         private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
@@ -113,32 +112,13 @@ namespace IoT_Dallas_of_Things_WPF
 
 
             HttpResponseMessage response = await client.SendAsync(request);
-
-
-
         }
-
 
         private void scan_Click(object sender, RoutedEventArgs e)
         {
             GreetingTextBlock.Visibility = Visibility.Hidden;
             RFIDTextBlock.IsEnabled = false;
             HideElements(false);
-        }
-
-        public static string getBetween(string strSource, string strStart, string strEnd)
-        {
-            int Start, End;
-            if (strSource.Contains(strStart) && strSource.Contains(strEnd))
-            {
-                Start = strSource.IndexOf(strStart, 0) + strStart.Length;
-                End = strSource.IndexOf(strEnd, Start);
-                return strSource.Substring(Start, End - Start);
-            }
-            else
-            {
-                return "";
-            }
         }
 
         private void CheckIn_Click(object sender, RoutedEventArgs e)
