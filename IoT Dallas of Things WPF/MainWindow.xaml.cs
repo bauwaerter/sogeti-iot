@@ -30,6 +30,7 @@ namespace IoT_Dallas_of_Things_WPF
     public partial class MainWindow
     {        
         private Device Device { get; set; }
+        private GetDevice GetDevice { get; set; }
 
         public MainWindow()
         {
@@ -95,7 +96,7 @@ namespace IoT_Dallas_of_Things_WPF
                 foreach (var item in jsonArr.Children())
                 {
                     var myObj = item.ToString();
-                    Device = JsonConvert.DeserializeObject<Device>(myObj);
+                    GetDevice = JsonConvert.DeserializeObject<GetDevice>(myObj);
                 }
 
                 HideElements(false);
@@ -128,7 +129,7 @@ namespace IoT_Dallas_of_Things_WPF
 
             Device = JsonConvert.DeserializeObject<Device>(json.ToString());
 
-            Device.name[0].text = "testing";
+            //Device.name[0].text = "testing";
         }
 
         private string GetRefreshToken()
@@ -178,10 +179,10 @@ namespace IoT_Dallas_of_Things_WPF
 
         private void PopulateUI()
         {
-            FNameTextBox.Text = Device.attributes.standard.Where(x => x.attributeType.name == "First Name").FirstOrDefault().value;
-            LNameTextBox.Text = Device.attributes.standard.Where(x => x.attributeType.name == "Last Name").FirstOrDefault().value;
-            PhoneTextBox.Text = Device.attributes.standard.Where(x => x.attributeType.name == "Phone Number").FirstOrDefault().value;
-            BusNumTextBox.Text = Device.attributes.standard.Where(x => x.attributeType.name == "Bus ID").FirstOrDefault().value;
+            FNameTextBox.Text = GetDevice.attributes.standard.Where(x => x.attributeType.name == "First Name").FirstOrDefault().value;
+            LNameTextBox.Text = GetDevice.attributes.standard.Where(x => x.attributeType.name == "Last Name").FirstOrDefault().value;
+            PhoneTextBox.Text = GetDevice.attributes.standard.Where(x => x.attributeType.name == "Phone Number").FirstOrDefault().value;
+            BusNumTextBox.Text = GetDevice.attributes.standard.Where(x => x.attributeType.name == "Bus ID").FirstOrDefault().value;
         }
 
         private void HideElements(bool hideElements)
