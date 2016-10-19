@@ -28,13 +28,27 @@ namespace IoT_Dallas_of_Things_WPF
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow
-    {        
-        private Device Device { get; set; }
-        private GetDevice GetDevice { get; set; }
+    {
+        #region constants
+        private const string BaggageState = "7f910683-ef6d-46e9-8a1f-06f49b4491a6";
+        private const string ScanTimestamp = "b06bd54b-4622-41a3-b888-7ac482ef65c5";
+        private const string FirstName = "43438b74-7957-4c9c-998f-ba1c61a7b52c";
+        private const string LastName = "f6f14ca9-a460-4682-a23d-bd3d4281fc4c";
+        private const string PhoneNumber = "8a247ca9-ca66-4341-8f7a-098bfc193438";
+        private const string BusId = "00887147-365e-46a7-8c49-965fe4fb784c";
+        private const string RfId = "30180c14-b478-47dd-a98d-2804c4ae16f8";
+        #endregion
+
+        private bool NewDevice { get; set; }
+        private ExistingDevice ExistingDevice { get; set; }       
+        private Device Device { get; set; }        
+        private string Token { get; set; }
 
         public MainWindow()
         {
-            SerialPort mySerialPort = new SerialPort("COM5");
+            var port = SerialPort.GetPortNames()[0];            
+
+            SerialPort mySerialPort = new SerialPort(port);
 
             mySerialPort.BaudRate = 9600;
             mySerialPort.Parity = Parity.None;
@@ -46,7 +60,7 @@ namespace IoT_Dallas_of_Things_WPF
 
             mySerialPort.DataReceived += new SerialDataReceivedEventHandler(DataReceivedHandler);
 
-            //mySerialPort.Open();
+            mySerialPort.Open();
 
             InitializeComponent();
 
@@ -61,63 +75,85 @@ namespace IoT_Dallas_of_Things_WPF
 
             this.Dispatcher.Invoke(() =>
             {
-                GreetingTextBlock.Text = "";
-                RFIDTextBlock.Content = indata;
-                //FNameTextBlock.Text = "First Name:";
+                GreetingTextBlock.Visibility = Visibility.Hidden;
+                RFIDTextBlock.Content = indata;                
             });
+
+            ProcessRFID(indata);
         }
 
-        private async void get_Click(object sender, RoutedEventArgs e)
+        private void ProcessRFID(string indata)
         {
-            var token = GetRefreshToken();
-            string indata = "82003C81F1CE";
+            GetRefreshToken();
 
+            CheckDevice(indata);
+
+            PopulateUI();
+
+            HideElements(false);
+        }
+
+        private void CheckIn_Click(object sender, RoutedEventArgs e)
+        {
+            HydrateDevice();
+
+            if (NewDevice)
+            {
+                CreateDevice();
+            }
+
+            UpdateDevice();
+
+            HideElements(true);
+        }
+
+        private async void CheckDevice(string indata)
+        {
             var client = new HttpClient();
             client.BaseAddress = new Uri("https://api.us1.covisint.com/");
-
             client.DefaultRequestHeaders.Accept.Clear();
-
             client.DefaultRequestHeaders.Add("Accept", "application/vnd.com.covisint.platform.device.v2+json;fetchattributetypes=true;fetcheventtemplates=true;fetchcommandtemplates=true");
-            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
+            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + Token);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "device/v3/devices?name=" + indata);
-
             HttpResponseMessage response = await client.SendAsync(request);
 
             response.EnsureSuccessStatusCode();
-            string responseBody = await response.Content.ReadAsStringAsync(); 
 
-            if (responseBody == "\n[\n]") {
+            string responseBody = await response.Content.ReadAsStringAsync();
+            responseBody.Replace("\n", String.Empty);
+            responseBody.Replace("\r", String.Empty);
 
+            if (responseBody == "[]")
+            {
+                NewDevice = true;
+                ExistingDevice = new ExistingDevice();                
             }
             else
             {
+                NewDevice = false;
                 var jsonArr = JArray.Parse(responseBody);
                 foreach (var item in jsonArr.Children())
                 {
                     var myObj = item.ToString();
-                    GetDevice = JsonConvert.DeserializeObject<GetDevice>(myObj);
-                }
-
-                HideElements(false);
-
-                PopulateUI();
-            } 
+                    ExistingDevice = JsonConvert.DeserializeObject<ExistingDevice>(myObj);
+                }                
+            }
         }
 
-        private async void create_Click(object sender, RoutedEventArgs e)
+        private async void CreateDevice()
         {
             //Client ID: paNHXLgIJxzQItbjHOm3VWZEqJ3soMAd
             //Client Secret: SbFM86Kj69jFj6eR
-            var token = GetRefreshToken();
+            PopulateDevice();
+
+            GetRefreshToken();
 
             var client = new HttpClient();
             client.BaseAddress = new Uri("https://api.us1.covisint.com/");
-
             client.DefaultRequestHeaders.Accept.Clear();
-
             client.DefaultRequestHeaders.Add("Accept", "application/vnd.com.covisint.platform.device.v2+json");
-            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
+            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + Token);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "device/v3/tasks/createDeviceFromTemplate?deviceTemplateId=2ccb21ac-dc8c-44cd-a9a7-5b5ddf87fd43");
             HttpResponseMessage response = await client.SendAsync(request);
@@ -128,35 +164,16 @@ namespace IoT_Dallas_of_Things_WPF
             var json = JObject.Parse(responseBody);
 
             Device = JsonConvert.DeserializeObject<Device>(json.ToString());
+        }        
 
-            //Device.name[0].text = "testing";
-        }
-
-        private string GetRefreshToken()
+        private async void UpdateDevice()
         {
-            var client = new RestClient("https://api.us1.covisint.com/oauth/v3/token");
-            var request = new RestRequest(Method.POST);            
-            request.AddHeader("cache-control", "no-cache");
-            request.AddHeader("authorization", "Basic cGFOSFhMZ0lKeHpRSXRiakhPbTNWV1pFcUozc29NQWQ6U2JGTTg2S2o2OWpGajZlUg==");
-            request.AddHeader("content-type", "application/x-www-form-urlencoded");
-            request.AddParameter("application/x-www-form-urlencoded", "grant_type=client_credentials", ParameterType.RequestBody);
-            IRestResponse response = client.Execute(request);
-            var access_token = JObject.Parse(response.Content.ToString())["access_token"].ToString();
-           
-            return access_token;
-        }
+            GetRefreshToken();
 
-        private async void update_Click(object sender, RoutedEventArgs e)
-        {
-            //deviceID = "4c295e3f-2b97-47eb-9798-10f92058418e";
-
-            var token = GetRefreshToken();
             var client = new HttpClient();
             client.BaseAddress = new Uri("https://api.us1.covisint.com/");
-
             client.DefaultRequestHeaders.Accept.Clear();
-
-            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
+            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + Token);
             client.DefaultRequestHeaders.Add("Accept", "application/vnd.com.covisint.platform.device.v2+json");
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, "/device/v3/devices/" + Device.id);
@@ -166,23 +183,80 @@ namespace IoT_Dallas_of_Things_WPF
             HttpResponseMessage response = await client.SendAsync(request);
         }
 
-        private void scan_Click(object sender, RoutedEventArgs e)
-        {            
-            RFIDTextBlock.IsEnabled = false;
-            HideElements(false);
+        #region helper methods
+        private void PopulateDevice()
+        {
+            Device.attributes.standard.Where(x => x.attributeTypeId == BaggageState).FirstOrDefault().value = "1";
+            Device.attributes.standard.Where(x => x.attributeTypeId == ScanTimestamp).FirstOrDefault().value = DateTime.Now.ToString();
+            Device.attributes.standard.Where(x => x.attributeTypeId == FirstName).FirstOrDefault().value = FNameTextBox.Text;
+            Device.attributes.standard.Where(x => x.attributeTypeId == LastName).FirstOrDefault().value = LNameTextBox.Text;
+            Device.attributes.standard.Where(x => x.attributeTypeId == PhoneNumber).FirstOrDefault().value = PhoneTextBox.Text;
+            Device.attributes.standard.Where(x => x.attributeTypeId == BusId).FirstOrDefault().value = BusNumTextBox.Text;
+            Device.attributes.standard.Where(x => x.attributeTypeId == RfId).FirstOrDefault().value = RFIDTextBlock.Content.ToString();
         }
 
-        private void CheckIn_Click(object sender, RoutedEventArgs e)
-        {            
-            HideElements(true);
+        private void HydrateDevice()
+        {
+            if (!NewDevice)
+            {
+                Device = new Device()
+                {
+                    id = ExistingDevice.id,
+                    version = ExistingDevice.version,
+                    creator = ExistingDevice.creator,
+                    creatorAppId = ExistingDevice.creatorAppId,
+                    creation = ExistingDevice.creation,
+                    realm = ExistingDevice.realm,
+                    name = ExistingDevice.name.Select(x => new Name { lang = x.lang, text = x.text }).ToArray(),
+                    parentDeviceTemplateId = ExistingDevice.parentDeviceTemplateId,
+                    state = new State { lifecycleState = ExistingDevice.state.lifecycleState, operationalState = ExistingDevice.state.operationalState },
+                    attributes = new Attributes() { standard = ExistingDevice.attributes.standard.Select(x => new Standard() { attributeTypeId = x.attributeType.id, value = x.value.ToString() }).ToList() },
+                    observableEvents = ExistingDevice.observableEvents.Select(x => x.id).ToArray(),
+                    isActive = ExistingDevice.isActive
+                };                
+            }
+            else
+            {
+                Device = new Device();
+            }
+        }
+
+        private void GetRefreshToken()
+        {
+            var client = new RestClient("https://api.us1.covisint.com/oauth/v3/token");
+            var request = new RestRequest(Method.POST);
+            request.AddHeader("cache-control", "no-cache");
+            request.AddHeader("authorization", "Basic cGFOSFhMZ0lKeHpRSXRiakhPbTNWV1pFcUozc29NQWQ6U2JGTTg2S2o2OWpGajZlUg==");
+            request.AddHeader("content-type", "application/x-www-form-urlencoded");
+            request.AddParameter("application/x-www-form-urlencoded", "grant_type=client_credentials", ParameterType.RequestBody);
+            IRestResponse response = client.Execute(request);
+            var access_token = JObject.Parse(response.Content.ToString())["access_token"].ToString();
+
+            Token = access_token;
         }
 
         private void PopulateUI()
         {
-            FNameTextBox.Text = GetDevice.attributes.standard.Where(x => x.attributeType.name == "First Name").FirstOrDefault().value;
-            LNameTextBox.Text = GetDevice.attributes.standard.Where(x => x.attributeType.name == "Last Name").FirstOrDefault().value;
-            PhoneTextBox.Text = GetDevice.attributes.standard.Where(x => x.attributeType.name == "Phone Number").FirstOrDefault().value;
-            BusNumTextBox.Text = GetDevice.attributes.standard.Where(x => x.attributeType.name == "Bus ID").FirstOrDefault().value;
+            if (!NewDevice)
+            {
+                FNameTextBox.Text = ExistingDevice.attributes.standard.Where(x => x.attributeType.id == FirstName).FirstOrDefault().value.ToString();
+                LNameTextBox.Text = ExistingDevice.attributes.standard.Where(x => x.attributeType.id == LastName).FirstOrDefault().value.ToString();
+                PhoneTextBox.Text = ExistingDevice.attributes.standard.Where(x => x.attributeType.id == PhoneNumber).FirstOrDefault().value.ToString();
+                BusNumTextBox.Text = ExistingDevice.attributes.standard.Where(x => x.attributeType.id == BusId).FirstOrDefault().value.ToString();
+                RFIDTextBlock.Content = ExistingDevice.attributes.standard.Where(x => x.attributeType.id == RfId).FirstOrDefault().value.ToString();
+            }
+            else
+            {                
+                ClearText();
+            }
+        }
+
+        private void ClearText()
+        {
+            FNameTextBox.Text = String.Empty;
+            LNameTextBox.Text = String.Empty;
+            PhoneTextBox.Text = String.Empty;
+            BusNumTextBox.Text = String.Empty;
         }
 
         private void HideElements(bool hideElements)
@@ -206,5 +280,6 @@ namespace IoT_Dallas_of_Things_WPF
 
             CheckInButton.Visibility = hideOrShowElement;
         }
+        #endregion
     }
 }

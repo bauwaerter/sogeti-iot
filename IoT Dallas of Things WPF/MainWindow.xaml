@@ -22,9 +22,5 @@
         <Button Margin="371,561,371,81" x:Name="CheckInButton" FontSize="18" Content="Check In Bag" Click="CheckIn_Click" />
 
         <!-- TEST BUTTONS -->
-        <Button Margin="10,9,898,656" Content="Scan Test" Click="scan_Click" />
-        <Button Margin="10,43,898,621" Content="Create Device" Click="create_Click"/>
-        <Button Margin="10,78,898,590" Content="Update Device" Click="update_Click"/>
-        <Button Margin="10,130,898,538" Content="Get Device" Click="get_Click"/>
     </Grid>
 </Controls:MetroWindow>
