@@ -66,6 +66,44 @@ namespace IoT_Dallas_of_Things_WPF
             });
         }
 
+        private async void get_Click(object sender, RoutedEventArgs e)
+        {
+            var token = GetRefreshToken();
+            string indata = "82003C81F1CE";
+
+            var client = new HttpClient();
+            client.BaseAddress = new Uri("https://api.us1.covisint.com/");
+
+            client.DefaultRequestHeaders.Accept.Clear();
+
+            client.DefaultRequestHeaders.Add("Accept", "application/vnd.com.covisint.platform.device.v2+json;fetchattributetypes=true;fetcheventtemplates=true;fetchcommandtemplates=true");
+            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + token);
+
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "device/v3/devices?name=" + indata);
+
+            HttpResponseMessage response = await client.SendAsync(request);
+
+            response.EnsureSuccessStatusCode();
+            string responseBody = await response.Content.ReadAsStringAsync(); 
+
+            if (responseBody == "\n[\n]") {
+
+            }
+            else
+            {
+                var jsonArr = JArray.Parse(responseBody);
+                foreach (var item in jsonArr.Children())
+                {
+                    var myObj = item.ToString();
+                    Device = JsonConvert.DeserializeObject<Device>(myObj);
+                }
+
+                HideElements(false);
+
+                PopulateUI();
+            } 
+        }
+
         private async void create_Click(object sender, RoutedEventArgs e)
         {
             //Client ID: paNHXLgIJxzQItbjHOm3VWZEqJ3soMAd
@@ -128,35 +166,42 @@ namespace IoT_Dallas_of_Things_WPF
         }
 
         private void scan_Click(object sender, RoutedEventArgs e)
-        {
-            GreetingTextBlock.Visibility = Visibility.Hidden;
+        {            
             RFIDTextBlock.IsEnabled = false;
             HideElements(false);
         }
 
         private void CheckIn_Click(object sender, RoutedEventArgs e)
-        {
-            GreetingTextBlock.Visibility = Visibility.Visible;
+        {            
             HideElements(true);
+        }
+
+        private void PopulateUI()
+        {
+            FNameTextBox.Text = Device.attributes.standard.Where(x => x.attributeType.name == "First Name").FirstOrDefault().value;
+            LNameTextBox.Text = Device.attributes.standard.Where(x => x.attributeType.name == "Last Name").FirstOrDefault().value;
+            PhoneTextBox.Text = Device.attributes.standard.Where(x => x.attributeType.name == "Phone Number").FirstOrDefault().value;
+            BusNumTextBox.Text = Device.attributes.standard.Where(x => x.attributeType.name == "Bus ID").FirstOrDefault().value;
         }
 
         private void HideElements(bool hideElements)
         {
+            var hideGreeting = !hideElements ? Visibility.Hidden : Visibility.Visible;
             var hideOrShowElement = hideElements ? Visibility.Hidden : Visibility.Visible;
+
+            GreetingTextBlock.Visibility = hideGreeting;
 
             RFIDTextBlock.Visibility = hideOrShowElement;
             FNameTextBox.Visibility = hideOrShowElement;
             LNameTextBox.Visibility = hideOrShowElement;
-            PhoneTextBox.Visibility = hideOrShowElement;
-            AddressTextBox.Visibility = hideOrShowElement;
+            PhoneTextBox.Visibility = hideOrShowElement;            
             BusNumTextBox.Visibility = hideOrShowElement;
 
             TagLabel.Visibility = hideOrShowElement;
             BusLabel.Visibility = hideOrShowElement;
             FirstNameLabel.Visibility = hideOrShowElement;
             LastNameLabel.Visibility = hideOrShowElement;
-            PhoneLabel.Visibility = hideOrShowElement;
-            AddressLabel.Visibility = hideOrShowElement;
+            PhoneLabel.Visibility = hideOrShowElement;            
 
             CheckInButton.Visibility = hideOrShowElement;
         }
