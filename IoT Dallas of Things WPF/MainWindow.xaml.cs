@@ -43,20 +43,23 @@ namespace IoT_Dallas_of_Things_WPF
         private ExistingDevice ExistingDevice { get; set; }       
         private Device Device { get; set; }        
         private string Token { get; set; }
+        SerialPort mySerialPort;
 
         public MainWindow()
         {
-            var port = SerialPort.GetPortNames()[0];            
+            var port = SerialPort.GetPortNames()[0];
+            port = "COM4";
 
-            SerialPort mySerialPort = new SerialPort(port);
+            mySerialPort = new SerialPort(port);
+            
 
             mySerialPort.BaudRate = 9600;
             mySerialPort.Parity = Parity.None;
             mySerialPort.StopBits = StopBits.One;
             mySerialPort.DataBits = 8;
-            mySerialPort.Handshake = Handshake.None;
-            mySerialPort.RtsEnable = true;
-            mySerialPort.DtrEnable = true;
+            //mySerialPort.Handshake = Handshake.None;
+            //mySerialPort.RtsEnable = true;
+            //mySerialPort.DtrEnable = true;
 
             mySerialPort.DataReceived += new SerialDataReceivedEventHandler(DataReceivedHandler);
 
@@ -72,13 +75,16 @@ namespace IoT_Dallas_of_Things_WPF
         {
             SerialPort sp = (SerialPort)sender;
             string indata = sp.ReadExisting();
+            indata = indata.Replace("\r\n", string.Empty);
+            indata = Regex.Replace(indata, @"[^0-9a-zA-Z]+", "");
 
             this.Dispatcher.Invoke(() =>
             {
-                GreetingTextBlock.Visibility = Visibility.Hidden;
-                RFIDTextBlock.Content = indata;                
+                //GreetingTextBlock.Visibility = Visibility.Hidden;
+                RFIDTextBlock.Content = indata;
             });
 
+            mySerialPort.Close();
             ProcessRFID(indata);
         }
 
@@ -87,23 +93,12 @@ namespace IoT_Dallas_of_Things_WPF
             GetRefreshToken();
 
             CheckDevice(indata);
-
-            PopulateUI();
-
-            HideElements(false);
         }
 
         private void CheckIn_Click(object sender, RoutedEventArgs e)
         {
             HydrateDevice();
-
-            if (NewDevice)
-            {
-                CreateDevice();
-            }
-
-            UpdateDevice();
-
+            CreateAndUpdateDevice();
             HideElements(true);
         }
 
@@ -121,10 +116,10 @@ namespace IoT_Dallas_of_Things_WPF
             response.EnsureSuccessStatusCode();
 
             string responseBody = await response.Content.ReadAsStringAsync();
-            responseBody.Replace("\n", String.Empty);
-            responseBody.Replace("\r", String.Empty);
+            //responseBody = responseBody.Replace("\\n", String.Empty);
+            //responseBody = responseBody.Replace("\\r", String.Empty);
 
-            if (responseBody == "[]")
+            if (responseBody == "\n[\n]")
             {
                 NewDevice = true;
                 ExistingDevice = new ExistingDevice();                
@@ -137,62 +132,71 @@ namespace IoT_Dallas_of_Things_WPF
                 {
                     var myObj = item.ToString();
                     ExistingDevice = JsonConvert.DeserializeObject<ExistingDevice>(myObj);
-                }                
+                }
             }
+            HideElements(false);
+            PopulateUI();
         }
 
-        private async void CreateDevice()
+        private async void CreateAndUpdateDevice()
         {
             //Client ID: paNHXLgIJxzQItbjHOm3VWZEqJ3soMAd
             //Client Secret: SbFM86Kj69jFj6eR
+            GetRefreshToken();
+
+            if (NewDevice)
+            {
+                var client = new HttpClient();
+                client.BaseAddress = new Uri("https://api.us1.covisint.com/");
+                client.DefaultRequestHeaders.Accept.Clear();
+                client.DefaultRequestHeaders.Add("Accept", "application/vnd.com.covisint.platform.device.v2+json");
+                client.DefaultRequestHeaders.Add("Authorization", "Bearer " + Token);
+
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "device/v3/tasks/createDeviceFromTemplate?deviceTemplateId=2ccb21ac-dc8c-44cd-a9a7-5b5ddf87fd43");
+                HttpResponseMessage response = await client.SendAsync(request);
+
+                response.EnsureSuccessStatusCode();
+                string responseBody = await response.Content.ReadAsStringAsync();
+
+                var json = JObject.Parse(responseBody);
+
+                Device = JsonConvert.DeserializeObject<Device>(json.ToString());
+            }
+
             PopulateDevice();
 
-            GetRefreshToken();
+            var updateClient = new HttpClient();
+            updateClient.BaseAddress = new Uri("https://api.us1.covisint.com/");
+            updateClient.DefaultRequestHeaders.Accept.Clear();
+            updateClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + Token);
+            updateClient.DefaultRequestHeaders.Add("Accept", "application/vnd.com.covisint.platform.device.v2+json");
 
-            var client = new HttpClient();
-            client.BaseAddress = new Uri("https://api.us1.covisint.com/");
-            client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Add("Accept", "application/vnd.com.covisint.platform.device.v2+json");
-            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + Token);
+            HttpRequestMessage updateRequest = new HttpRequestMessage(HttpMethod.Put, "/device/v3/devices/" + Device.id);
+            string updateJson = JsonConvert.SerializeObject(Device);
+            updateRequest.Content = new StringContent(updateJson, Encoding.UTF8, "application/vnd.com.covisint.platform.device.v2+json");
 
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "device/v3/tasks/createDeviceFromTemplate?deviceTemplateId=2ccb21ac-dc8c-44cd-a9a7-5b5ddf87fd43");
-            HttpResponseMessage response = await client.SendAsync(request);
-
-            response.EnsureSuccessStatusCode();
-            string responseBody = await response.Content.ReadAsStringAsync();
-
-            var json = JObject.Parse(responseBody);
-
-            Device = JsonConvert.DeserializeObject<Device>(json.ToString());
+            HttpResponseMessage updateResponse = await updateClient.SendAsync(updateRequest);
+            updateResponse.EnsureSuccessStatusCode();
+            mySerialPort.Open();
         }        
-
-        private async void UpdateDevice()
-        {
-            GetRefreshToken();
-
-            var client = new HttpClient();
-            client.BaseAddress = new Uri("https://api.us1.covisint.com/");
-            client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Add("Authorization", "Bearer " + Token);
-            client.DefaultRequestHeaders.Add("Accept", "application/vnd.com.covisint.platform.device.v2+json");
-
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, "/device/v3/devices/" + Device.id);
-            string json = JsonConvert.SerializeObject(Device);
-            request.Content = new StringContent(json, Encoding.UTF8, "application/vnd.com.covisint.platform.device.v2+json");
-            
-            HttpResponseMessage response = await client.SendAsync(request);
-        }
 
         #region helper methods
         private void PopulateDevice()
         {
-            Device.attributes.standard.Where(x => x.attributeTypeId == BaggageState).FirstOrDefault().value = "1";
-            Device.attributes.standard.Where(x => x.attributeTypeId == ScanTimestamp).FirstOrDefault().value = DateTime.Now.ToString();
+            Device.attributes.standard.Where(x => x.attributeTypeId == BaggageState).FirstOrDefault().value = 1;
+            Device.attributes.standard.Where(x => x.attributeTypeId == ScanTimestamp).FirstOrDefault().value = GetEpochTime();
             Device.attributes.standard.Where(x => x.attributeTypeId == FirstName).FirstOrDefault().value = FNameTextBox.Text;
             Device.attributes.standard.Where(x => x.attributeTypeId == LastName).FirstOrDefault().value = LNameTextBox.Text;
-            Device.attributes.standard.Where(x => x.attributeTypeId == PhoneNumber).FirstOrDefault().value = PhoneTextBox.Text;
+            Device.attributes.standard.Where(x => x.attributeTypeId == PhoneNumber).FirstOrDefault().value = Convert.ToInt64(PhoneTextBox.Text);
             Device.attributes.standard.Where(x => x.attributeTypeId == BusId).FirstOrDefault().value = BusNumTextBox.Text;
             Device.attributes.standard.Where(x => x.attributeTypeId == RfId).FirstOrDefault().value = RFIDTextBlock.Content.ToString();
+            Device.name.FirstOrDefault().text = RFIDTextBlock.Content.ToString();
+        }
+
+        private int GetEpochTime()
+        {
+            TimeSpan t = DateTime.UtcNow - new DateTime(1970, 1, 1);
+            return (int)t.TotalSeconds;
         }
 
         private void HydrateDevice()
@@ -217,7 +221,7 @@ namespace IoT_Dallas_of_Things_WPF
             }
             else
             {
-                Device = new Device();
+                Device = new Device(){attributes = new Attributes() {standard = new List<Standard>()}};
             }
         }
 
@@ -230,6 +234,7 @@ namespace IoT_Dallas_of_Things_WPF
             request.AddHeader("content-type", "application/x-www-form-urlencoded");
             request.AddParameter("application/x-www-form-urlencoded", "grant_type=client_credentials", ParameterType.RequestBody);
             IRestResponse response = client.Execute(request);
+            //response.EnsureSuccessStatusCode();
             var access_token = JObject.Parse(response.Content.ToString())["access_token"].ToString();
 
             Token = access_token;
@@ -239,11 +244,14 @@ namespace IoT_Dallas_of_Things_WPF
         {
             if (!NewDevice)
             {
-                FNameTextBox.Text = ExistingDevice.attributes.standard.Where(x => x.attributeType.id == FirstName).FirstOrDefault().value.ToString();
-                LNameTextBox.Text = ExistingDevice.attributes.standard.Where(x => x.attributeType.id == LastName).FirstOrDefault().value.ToString();
-                PhoneTextBox.Text = ExistingDevice.attributes.standard.Where(x => x.attributeType.id == PhoneNumber).FirstOrDefault().value.ToString();
-                BusNumTextBox.Text = ExistingDevice.attributes.standard.Where(x => x.attributeType.id == BusId).FirstOrDefault().value.ToString();
-                RFIDTextBlock.Content = ExistingDevice.attributes.standard.Where(x => x.attributeType.id == RfId).FirstOrDefault().value.ToString();
+                this.Dispatcher.Invoke(() =>
+                {
+                    FNameTextBox.Text = ExistingDevice.attributes.standard.Where(x => x.attributeType.id == FirstName).FirstOrDefault().value.ToString();
+                    LNameTextBox.Text = ExistingDevice.attributes.standard.Where(x => x.attributeType.id == LastName).FirstOrDefault().value.ToString();
+                    PhoneTextBox.Text = ExistingDevice.attributes.standard.Where(x => x.attributeType.id == PhoneNumber).FirstOrDefault().value.ToString();
+                    BusNumTextBox.Text = ExistingDevice.attributes.standard.Where(x => x.attributeType.id == BusId).FirstOrDefault().value.ToString();
+                    RFIDTextBlock.Content = ExistingDevice.attributes.standard.Where(x => x.attributeType.id == RfId).FirstOrDefault().value.ToString();
+                });
             }
             else
             {                
@@ -253,10 +261,13 @@ namespace IoT_Dallas_of_Things_WPF
 
         private void ClearText()
         {
-            FNameTextBox.Text = String.Empty;
-            LNameTextBox.Text = String.Empty;
-            PhoneTextBox.Text = String.Empty;
-            BusNumTextBox.Text = String.Empty;
+            this.Dispatcher.Invoke(() =>
+            {
+                FNameTextBox.Text = String.Empty;
+                LNameTextBox.Text = String.Empty;
+                PhoneTextBox.Text = String.Empty;
+                BusNumTextBox.Text = String.Empty;
+            });
         }
 
         private void HideElements(bool hideElements)
@@ -264,21 +275,24 @@ namespace IoT_Dallas_of_Things_WPF
             var hideGreeting = !hideElements ? Visibility.Hidden : Visibility.Visible;
             var hideOrShowElement = hideElements ? Visibility.Hidden : Visibility.Visible;
 
-            GreetingTextBlock.Visibility = hideGreeting;
+            this.Dispatcher.Invoke(() =>
+            {
+                GreetingTextBlock.Visibility = hideGreeting;
 
-            RFIDTextBlock.Visibility = hideOrShowElement;
-            FNameTextBox.Visibility = hideOrShowElement;
-            LNameTextBox.Visibility = hideOrShowElement;
-            PhoneTextBox.Visibility = hideOrShowElement;            
-            BusNumTextBox.Visibility = hideOrShowElement;
+                RFIDTextBlock.Visibility = hideOrShowElement;
+                FNameTextBox.Visibility = hideOrShowElement;
+                LNameTextBox.Visibility = hideOrShowElement;
+                PhoneTextBox.Visibility = hideOrShowElement;            
+                BusNumTextBox.Visibility = hideOrShowElement;
 
-            TagLabel.Visibility = hideOrShowElement;
-            BusLabel.Visibility = hideOrShowElement;
-            FirstNameLabel.Visibility = hideOrShowElement;
-            LastNameLabel.Visibility = hideOrShowElement;
-            PhoneLabel.Visibility = hideOrShowElement;            
+                TagLabel.Visibility = hideOrShowElement;
+                BusLabel.Visibility = hideOrShowElement;
+                FirstNameLabel.Visibility = hideOrShowElement;
+                LastNameLabel.Visibility = hideOrShowElement;
+                PhoneLabel.Visibility = hideOrShowElement;            
 
-            CheckInButton.Visibility = hideOrShowElement;
+                CheckInButton.Visibility = hideOrShowElement;
+            });
         }
         #endregion
     }

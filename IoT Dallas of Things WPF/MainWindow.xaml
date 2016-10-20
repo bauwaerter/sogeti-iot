@@ -4,22 +4,26 @@
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         Title="SmartBag" Height="768" Width="1000"
         ResizeMode="NoResize"  Cursor="None" HorizontalAlignment="Center" VerticalAlignment="Center" BorderThickness="4" WindowStyle="None">
-    
+
     <Grid Margin="0,0,0,45">
-        <Label Content="Smart Tag Number:" x:Name="TagLabel" FontSize="40" Margin="0,50,302,580" HorizontalAlignment="Right" Width="376"/>
-        <Label Content="Bus Number:" x:Name="BusLabel" FontSize="26" Margin="306,221,530,428" Width="158"/>
-        <Label Content="First Name:" x:Name="FirstNameLabel" FontSize="26" Margin="320,287,534,361" />
-        <Label Content="Last Name:" x:Name="LastNameLabel" FontSize="26" Margin="328,347,530,300" />
-        <Label Content="Phone Number:" x:Name="PhoneLabel" FontSize="26" Margin="272,399,530,251"/>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="563*"/>
+            <ColumnDefinition Width="429*"/>
+        </Grid.ColumnDefinitions>
+        <Label Content="Smart Tag Number:" x:Name="TagLabel" FontSize="40" Margin="0,50,302,580" HorizontalAlignment="Right" Width="376" Grid.ColumnSpan="2"/>
+        <Label Content="Bus Number:" x:Name="BusLabel" FontSize="26" Margin="306,221,99.164,428" Width="158"/>
+        <Label Content="First Name:" x:Name="FirstNameLabel" FontSize="26" Margin="320,287,105.164,361" />
+        <Label Content="Last Name:" x:Name="LastNameLabel" FontSize="26" Margin="328,347,101.164,300" />
+        <Label Content="Phone Number:" x:Name="PhoneLabel" FontSize="26" Margin="272,399,101.164,251"/>
 
-        <TextBlock x:Name="GreetingTextBlock" FontSize="50" Text="Please Scan An RFID Tag" Margin="224,200,222,418"/>
-        <Label x:Name="RFIDTextBlock" FontSize="36" Content="82003C84DDE7" Margin="367,109,368,529" />
-        <TextBox x:Name="BusNumTextBox" FontSize="24" Text="bus #" Height="42" Width="272" Margin="0,0,253,431" BorderThickness="0 0 0 1" HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
-        <TextBox x:Name="FNameTextBox" FontSize="24" Text="john" Height="42" Width="272" Margin="0,0,253,365" BorderThickness="0 0 0 1" HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
-        <TextBox x:Name="LNameTextBox" FontSize="24" Text="doe" Height="42" Width="272" Margin="0,0,253,305" BorderThickness="0 0 0 1" HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
-        <TextBox x:Name="PhoneTextBox" FontSize="24" Text="682-555-3412"  Height="42" Width="272" Margin="0,0,253,251" BorderThickness="0 0 0 1" HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
+        <TextBlock x:Name="GreetingTextBlock" FontSize="50" Text="Please Scan An RFID Tag" Margin="224,200,222,418" Grid.ColumnSpan="2"/>
+        <Label x:Name="RFIDTextBlock" FontSize="36" Content="82003C84DDE7" Margin="367,109,368,529" Grid.ColumnSpan="2" />
+        <TextBox x:Name="BusNumTextBox" FontSize="24" Text="bus #" Height="42" Width="272" Margin="0,0,253,431" BorderThickness="0 0 0 1" HorizontalAlignment="Right" VerticalAlignment="Bottom" Grid.ColumnSpan="2"/>
+        <TextBox x:Name="FNameTextBox" FontSize="24" Text="john" Height="42" Width="272" Margin="0,0,253,365" BorderThickness="0 0 0 1" HorizontalAlignment="Right" VerticalAlignment="Bottom" Grid.ColumnSpan="2"/>
+        <TextBox x:Name="LNameTextBox" FontSize="24" Text="doe" Height="42" Width="272" Margin="0,0,253,305" BorderThickness="0 0 0 1" HorizontalAlignment="Right" VerticalAlignment="Bottom" Grid.ColumnSpan="2"/>
+        <TextBox x:Name="PhoneTextBox" FontSize="24" Text="682-555-3412"  Height="42" Width="272" Margin="0,0,253,251" BorderThickness="0 0 0 1" HorizontalAlignment="Right" VerticalAlignment="Bottom" Grid.ColumnSpan="2"/>
 
-        <Button Margin="371,561,371,81" x:Name="CheckInButton" FontSize="18" Content="Check In Bag" Click="CheckIn_Click" />
+        <Button Margin="371,561,371,81" x:Name="CheckInButton" FontSize="18" Content="Check In Bag" Click="CheckIn_Click" Grid.ColumnSpan="2" />
 
         <!-- TEST BUTTONS -->
     </Grid>

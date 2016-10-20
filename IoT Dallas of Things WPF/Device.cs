@@ -37,7 +37,7 @@ namespace IoT_Dallas_of_Things_WPF
     public class Standard
     {        
         public string attributeTypeId { get; set; }
-        public string value { get; set; }
+        public object value { get; set; }
     }    
 
     public class Authentication
