@@ -48,7 +48,7 @@ namespace IoT_Dallas_of_Things_WPF
         public MainWindow()
         {
             var port = SerialPort.GetPortNames()[0];
-            port = "COM4";
+            port = "COM3";
 
             mySerialPort = new SerialPort(port);
             
@@ -74,7 +74,7 @@ namespace IoT_Dallas_of_Things_WPF
         private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
         {
             SerialPort sp = (SerialPort)sender;
-            string indata = sp.ReadExisting();
+            string indata = sp.ReadLine();
             indata = indata.Replace("\r\n", string.Empty);
             indata = Regex.Replace(indata, @"[^0-9a-zA-Z]+", "");
 
@@ -99,7 +99,6 @@ namespace IoT_Dallas_of_Things_WPF
         {
             HydrateDevice();
             CreateAndUpdateDevice();
-            HideElements(true);
         }
 
         private async void CheckDevice(string indata)
@@ -146,6 +145,7 @@ namespace IoT_Dallas_of_Things_WPF
 
             if (NewDevice)
             {
+                //create
                 var client = new HttpClient();
                 client.BaseAddress = new Uri("https://api.us1.covisint.com/");
                 client.DefaultRequestHeaders.Accept.Clear();
@@ -165,6 +165,7 @@ namespace IoT_Dallas_of_Things_WPF
 
             PopulateDevice();
 
+            //update
             var updateClient = new HttpClient();
             updateClient.BaseAddress = new Uri("https://api.us1.covisint.com/");
             updateClient.DefaultRequestHeaders.Accept.Clear();
@@ -177,7 +178,33 @@ namespace IoT_Dallas_of_Things_WPF
 
             HttpResponseMessage updateResponse = await updateClient.SendAsync(updateRequest);
             updateResponse.EnsureSuccessStatusCode();
+
+            //activate
+            var activateClient = new HttpClient();
+            activateClient.BaseAddress = new Uri("https://api.us1.covisint.com/");
+            activateClient.DefaultRequestHeaders.Accept.Clear();
+            activateClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + Token);
+            activateClient.DefaultRequestHeaders.Add("Accept", "application/vnd.com.covisint.platform.device.v2+json");
+
+            HttpRequestMessage activateRequest = new HttpRequestMessage(HttpMethod.Post, "/device/v3/devices/" + Device.id + "/tasks/activate");
+            HttpResponseMessage activateResponse = await activateClient.SendAsync(activateRequest);
+            activateResponse.EnsureSuccessStatusCode();
+            
+            //register
+            var registerClient = new HttpClient();
+            registerClient.BaseAddress = new Uri("https://api.us1.covisint.com/");
+            registerClient.DefaultRequestHeaders.Accept.Clear();
+            registerClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + Token);
+            registerClient.DefaultRequestHeaders.Add("Accept", "accept/json");
+
+            HttpRequestMessage registerRequest = new HttpRequestMessage(HttpMethod.Post, "/device/v3/devices/" + Device.id + "/tasks/register");
+            registerRequest.Content = new StringContent("{\"authNType\":\"NO_AUTH\"}", Encoding.UTF8, "application/vnd.com.covisint.platform.device.register.v1+json");
+            HttpResponseMessage registerResponse = await registerClient.SendAsync(registerRequest);
+            activateResponse.EnsureSuccessStatusCode();
+
             mySerialPort.Open();
+            HideElements(true);
+
         }        
 
         #region helper methods
