@@ -21,6 +21,7 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RestSharp;
+using System.Windows.Threading;
 
 namespace IoT_Dallas_of_Things_WPF
 {
@@ -40,18 +41,19 @@ namespace IoT_Dallas_of_Things_WPF
         #endregion
 
         private bool NewDevice { get; set; }
-        private ExistingDevice ExistingDevice { get; set; }       
-        private Device Device { get; set; }        
+        private ExistingDevice ExistingDevice { get; set; }
+        private Device Device { get; set; }
         private string Token { get; set; }
         SerialPort mySerialPort;
 
         public MainWindow()
         {
             var port = SerialPort.GetPortNames()[0];
-            port = "COM3";
+            string[] ports = SerialPort.GetPortNames();
+            //var port = "COM5";
 
             mySerialPort = new SerialPort(port);
-            
+
 
             mySerialPort.BaudRate = 9600;
             mySerialPort.Parity = Parity.None;
@@ -80,8 +82,8 @@ namespace IoT_Dallas_of_Things_WPF
 
             this.Dispatcher.Invoke(() =>
             {
-                //GreetingTextBlock.Visibility = Visibility.Hidden;
                 RFIDTextBlock.Content = indata;
+                RFIDTextBlock.IsEnabled = false;
             });
 
             mySerialPort.Close();
@@ -91,12 +93,13 @@ namespace IoT_Dallas_of_Things_WPF
         private void ProcessRFID(string indata)
         {
             GetRefreshToken();
-
             CheckDevice(indata);
         }
 
         private void CheckIn_Click(object sender, RoutedEventArgs e)
         {
+            loadGif.Visibility = Visibility.Visible;
+            grid.Opacity = 0.15;
             HydrateDevice();
             CreateAndUpdateDevice();
         }
@@ -112,16 +115,15 @@ namespace IoT_Dallas_of_Things_WPF
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "device/v3/devices?name=" + indata);
             HttpResponseMessage response = await client.SendAsync(request);
 
+            //put try catch around response and display error message. Have response of a 500 we can use saved in a txt
             response.EnsureSuccessStatusCode();
 
             string responseBody = await response.Content.ReadAsStringAsync();
-            //responseBody = responseBody.Replace("\\n", String.Empty);
-            //responseBody = responseBody.Replace("\\r", String.Empty);
 
             if (responseBody == "\n[\n]")
             {
                 NewDevice = true;
-                ExistingDevice = new ExistingDevice();                
+                ExistingDevice = new ExistingDevice();
             }
             else
             {
@@ -139,8 +141,6 @@ namespace IoT_Dallas_of_Things_WPF
 
         private async void CreateAndUpdateDevice()
         {
-            //Client ID: paNHXLgIJxzQItbjHOm3VWZEqJ3soMAd
-            //Client Secret: SbFM86Kj69jFj6eR
             GetRefreshToken();
 
             if (NewDevice)
@@ -189,7 +189,7 @@ namespace IoT_Dallas_of_Things_WPF
             HttpRequestMessage activateRequest = new HttpRequestMessage(HttpMethod.Post, "/device/v3/devices/" + Device.id + "/tasks/activate");
             HttpResponseMessage activateResponse = await activateClient.SendAsync(activateRequest);
             activateResponse.EnsureSuccessStatusCode();
-            
+
             //register
             var registerClient = new HttpClient();
             registerClient.BaseAddress = new Uri("https://api.us1.covisint.com/");
@@ -204,9 +204,9 @@ namespace IoT_Dallas_of_Things_WPF
 
             mySerialPort.Open();
             HideElements(true);
-
-        }        
-
+            loadGif.Visibility = Visibility.Hidden;
+            grid.Opacity = 1.00;
+        }
         #region helper methods
         private void PopulateDevice()
         {
@@ -244,11 +244,11 @@ namespace IoT_Dallas_of_Things_WPF
                     attributes = new Attributes() { standard = ExistingDevice.attributes.standard.Select(x => new Standard() { attributeTypeId = x.attributeType.id, value = x.value.ToString() }).ToList() },
                     observableEvents = ExistingDevice.observableEvents.Select(x => x.id).ToArray(),
                     isActive = ExistingDevice.isActive
-                };                
+                };
             }
             else
             {
-                Device = new Device(){attributes = new Attributes() {standard = new List<Standard>()}};
+                Device = new Device() { attributes = new Attributes() { standard = new List<Standard>() } };
             }
         }
 
@@ -261,7 +261,6 @@ namespace IoT_Dallas_of_Things_WPF
             request.AddHeader("content-type", "application/x-www-form-urlencoded");
             request.AddParameter("application/x-www-form-urlencoded", "grant_type=client_credentials", ParameterType.RequestBody);
             IRestResponse response = client.Execute(request);
-            //response.EnsureSuccessStatusCode();
             var access_token = JObject.Parse(response.Content.ToString())["access_token"].ToString();
 
             Token = access_token;
@@ -281,7 +280,7 @@ namespace IoT_Dallas_of_Things_WPF
                 });
             }
             else
-            {                
+            {
                 ClearText();
             }
         }
@@ -309,14 +308,14 @@ namespace IoT_Dallas_of_Things_WPF
                 RFIDTextBlock.Visibility = hideOrShowElement;
                 FNameTextBox.Visibility = hideOrShowElement;
                 LNameTextBox.Visibility = hideOrShowElement;
-                PhoneTextBox.Visibility = hideOrShowElement;            
+                PhoneTextBox.Visibility = hideOrShowElement;
                 BusNumTextBox.Visibility = hideOrShowElement;
 
                 TagLabel.Visibility = hideOrShowElement;
                 BusLabel.Visibility = hideOrShowElement;
                 FirstNameLabel.Visibility = hideOrShowElement;
                 LastNameLabel.Visibility = hideOrShowElement;
-                PhoneLabel.Visibility = hideOrShowElement;            
+                PhoneLabel.Visibility = hideOrShowElement;
 
                 CheckInButton.Visibility = hideOrShowElement;
             });
