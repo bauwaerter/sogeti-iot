@@ -21,7 +21,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RestSharp;
-using System.Windows.Threading;
 
 namespace IoT_Dallas_of_Things_WPF
 {
@@ -54,7 +53,6 @@ namespace IoT_Dallas_of_Things_WPF
 
             mySerialPort = new SerialPort(port);
 
-
             mySerialPort.BaudRate = 9600;
             mySerialPort.Parity = Parity.None;
             mySerialPort.StopBits = StopBits.One;
@@ -66,15 +64,16 @@ namespace IoT_Dallas_of_Things_WPF
             mySerialPort.DataReceived += new SerialDataReceivedEventHandler(DataReceivedHandler);
 
             mySerialPort.Open();
-
+            
             InitializeComponent();
-
+            
             //disable text-box UI in preperation for first scan
             HideElements(true);
         }
 
         private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
         {
+            
             SerialPort sp = (SerialPort)sender;
             string indata = sp.ReadLine();
             indata = indata.Replace("\r\n", string.Empty);
@@ -82,6 +81,8 @@ namespace IoT_Dallas_of_Things_WPF
 
             this.Dispatcher.Invoke(() =>
             {
+                this.Cursor = Cursors.Wait;
+                GreetingTextBlock.IsEnabled = false;
                 RFIDTextBlock.Content = indata;
                 RFIDTextBlock.IsEnabled = false;
             });
@@ -98,7 +99,7 @@ namespace IoT_Dallas_of_Things_WPF
 
         private void CheckIn_Click(object sender, RoutedEventArgs e)
         {
-            loadGif.Visibility = Visibility.Visible;
+            this.Cursor = Cursors.Wait;
             grid.Opacity = 0.15;
             HydrateDevice();
             CreateAndUpdateDevice();
@@ -135,8 +136,14 @@ namespace IoT_Dallas_of_Things_WPF
                     ExistingDevice = JsonConvert.DeserializeObject<ExistingDevice>(myObj);
                 }
             }
+
             HideElements(false);
             PopulateUI();
+
+            this.Dispatcher.Invoke(() =>
+            {
+                this.Cursor = Cursors.Arrow;
+            });
         }
 
         private async void CreateAndUpdateDevice()
@@ -204,7 +211,7 @@ namespace IoT_Dallas_of_Things_WPF
 
             mySerialPort.Open();
             HideElements(true);
-            loadGif.Visibility = Visibility.Hidden;
+            this.Cursor = Cursors.Arrow;
             grid.Opacity = 1.00;
         }
         #region helper methods

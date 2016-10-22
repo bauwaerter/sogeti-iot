@@ -4,7 +4,7 @@
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:wpfanimated="http://wpfanimatedgif.codeplex.com"
         Title="SmartBag" Height="768" Width="1000"
-        ResizeMode="NoResize"  Cursor="None" HorizontalAlignment="Center" VerticalAlignment="Center" BorderThickness="4" WindowStyle="None">
+        ResizeMode="NoResize" HorizontalAlignment="Center" VerticalAlignment="Center" BorderThickness="4"   TitleCaps="False" >
 
     <Grid Margin="0,0,0,45">
         <Grid x:Name="grid">
@@ -25,7 +25,7 @@
             <TextBox x:Name="LNameTextBox" FontSize="24" Text="doe" Height="42" Width="272" Margin="0,0,253,305" BorderThickness="0 0 0 1" HorizontalAlignment="Right" VerticalAlignment="Bottom" Grid.ColumnSpan="2"/>
             <TextBox x:Name="PhoneTextBox" FontSize="24" Text="682-555-3412"  Height="42" Width="272" Margin="0,0,253,251" BorderThickness="0 0 0 1" HorizontalAlignment="Right" VerticalAlignment="Bottom" Grid.ColumnSpan="2"/>
 
-            <Button Margin="371,561,371,81" x:Name="CheckInButton" FontSize="18" Content="Check In Bag" Click="CheckIn_Click" Grid.ColumnSpan="2" />
+            <Button Cursor="Hand" Margin="371,561,371,81" x:Name="CheckInButton" FontSize="18" Content="Check In Bag" Click="CheckIn_Click" Grid.ColumnSpan="2" />
 
             <TextBlock x:Name="GreetingTextBlock" FontSize="50" Margin="224,200,222,418" Grid.ColumnSpan="2">
                 <TextBlock.Style>
