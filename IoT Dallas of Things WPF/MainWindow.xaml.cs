@@ -49,7 +49,7 @@ namespace IoT_Dallas_of_Things_WPF
         {
             var port = SerialPort.GetPortNames()[0];
             string[] ports = SerialPort.GetPortNames();
-            //var port = "COM5";
+            //var port = "COM4";
 
             mySerialPort = new SerialPort(port);
 
@@ -217,7 +217,7 @@ namespace IoT_Dallas_of_Things_WPF
         #region helper methods
         private void PopulateDevice()
         {
-            Device.attributes.standard.Where(x => x.attributeTypeId == BaggageState).FirstOrDefault().value = 1;
+            Device.attributes.standard.Where(x => x.attributeTypeId == BaggageState).FirstOrDefault().value = 0;
             Device.attributes.standard.Where(x => x.attributeTypeId == ScanTimestamp).FirstOrDefault().value = GetEpochTime();
             Device.attributes.standard.Where(x => x.attributeTypeId == FirstName).FirstOrDefault().value = FNameTextBox.Text;
             Device.attributes.standard.Where(x => x.attributeTypeId == LastName).FirstOrDefault().value = LNameTextBox.Text;
