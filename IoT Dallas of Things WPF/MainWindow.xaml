@@ -16,10 +16,10 @@
             <Label Content="Phone Number:" x:Name="PhoneLabel" FontSize="26" Margin="272,399,101.164,251"/>
 
             <Label x:Name="RFIDTextBlock" FontSize="36" Content="82003C84DDE7" Margin="367,109,368,529" Grid.ColumnSpan="2" />
-            <TextBox x:Name="BusNumTextBox" FontSize="24" Text="bus #" Height="42" Width="272" Margin="0,0,253,431" BorderThickness="0 0 0 1" HorizontalAlignment="Right" VerticalAlignment="Bottom" Grid.ColumnSpan="2"/>
-            <TextBox x:Name="FNameTextBox" FontSize="24" Text="john" Height="42" Width="272" Margin="0,0,253,365" BorderThickness="0 0 0 1" HorizontalAlignment="Right" VerticalAlignment="Bottom" Grid.ColumnSpan="2"/>
-            <TextBox x:Name="LNameTextBox" FontSize="24" Text="doe" Height="42" Width="272" Margin="0,0,253,305" BorderThickness="0 0 0 1" HorizontalAlignment="Right" VerticalAlignment="Bottom" Grid.ColumnSpan="2"/>
-            <TextBox x:Name="PhoneTextBox" FontSize="24" Text="682-555-3412"  Height="42" Width="272" Margin="0,0,253,251" BorderThickness="0 0 0 1" HorizontalAlignment="Right" VerticalAlignment="Bottom" Grid.ColumnSpan="2"/>
+            <TextBox x:Name="BusNumTextBox" PreviewTextInput="onlyThreeNumbers" FontSize="24" Text="bus #" Height="42" Width="272" Margin="0,0,253,431" BorderThickness="0 0 0 1" HorizontalAlignment="Right" VerticalAlignment="Bottom" Grid.ColumnSpan="2"/>
+            <TextBox x:Name="FNameTextBox" PreviewTextInput="onlyText" FontSize="24" Text="john" Height="42" Width="272" Margin="0,0,253,365" BorderThickness="0 0 0 1" HorizontalAlignment="Right" VerticalAlignment="Bottom" Grid.ColumnSpan="2"/>
+            <TextBox x:Name="LNameTextBox" PreviewTextInput="onlyText" FontSize="24" Text="doe" Height="42" Width="272" Margin="0,0,253,305" BorderThickness="0 0 0 1" HorizontalAlignment="Right" VerticalAlignment="Bottom" Grid.ColumnSpan="2"/>
+            <TextBox x:Name="PhoneTextBox" PreviewTextInput="onlyNumbers" FontSize="24" Text="682-555-3412"  Height="42" Width="272" Margin="0,0,253,251" BorderThickness="0 0 0 1" HorizontalAlignment="Right" VerticalAlignment="Bottom" Grid.ColumnSpan="2"/>
 
             <Button Cursor="Hand" Margin="371,561,371,81" x:Name="CheckInButton" FontSize="18" Content="Check In Bag" Click="CheckIn_Click" Grid.ColumnSpan="2" />
 

@@ -74,14 +74,6 @@ namespace IoT_Dallas_of_Things_WPF
             
             //disable text-box UI in preperation for first scan
             HideElements(true);
-
-            
-            //Tuple<AppTheme, Accent> theme = ThemeManager.DetectAppStyle(Application.Current);
-            //// now change app style to the custom accent and current theme
-            //ThemeManager.ChangeAppStyle(Application.Current,
-            //                            ThemeManager.GetAccent("smartBagColorTheme"),
-            //                            theme.Item1);
-
         }
 
         private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
@@ -339,6 +331,24 @@ namespace IoT_Dallas_of_Things_WPF
 
                 CheckInButton.Visibility = hideOrShowElement;
             });
+        }
+
+        private void onlyNumbers(object sender, TextCompositionEventArgs e)
+        {
+            Regex regex = new Regex("[^0-9]+");
+            e.Handled = regex.IsMatch(e.Text);
+        }
+
+        private void onlyThreeNumbers(object sender, TextCompositionEventArgs e)
+        {
+            Regex regex = new Regex("[^0-9]+");
+            e.Handled = regex.IsMatch(e.Text);
+        }
+
+        private void onlyText(object sender, TextCompositionEventArgs e)
+        {
+            Regex regex = new Regex("[^a-zA-Z]+");
+            e.Handled = regex.IsMatch(e.Text);
         }
         #endregion
     }
