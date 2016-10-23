@@ -21,6 +21,7 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RestSharp;
+using MahApps.Metro;
 
 namespace IoT_Dallas_of_Things_WPF
 {
@@ -45,6 +46,18 @@ namespace IoT_Dallas_of_Things_WPF
         private string Token { get; set; }
         SerialPort mySerialPort;
 
+        protected void OnStartup(StartupEventArgs e)
+        {
+            ThemeManager.AddAccent("smartBagColorTheme", new Uri("Content\\MahApps\\smartBagColorTheme.xaml"));
+
+            Tuple<AppTheme, Accent> theme = ThemeManager.DetectAppStyle(Application.Current);
+
+            ThemeManager.ChangeAppStyle(Application.Current,
+                                        ThemeManager.GetAccent("smartBagColorTheme"),
+                                        theme.Item1);
+            //base.OnStartup(e);
+        }
+
         public MainWindow()
         {
             string port = Properties.Settings.Default.Port;
@@ -55,9 +68,6 @@ namespace IoT_Dallas_of_Things_WPF
             mySerialPort.Parity = Parity.None;
             mySerialPort.StopBits = StopBits.One;
             mySerialPort.DataBits = 8;
-            //mySerialPort.Handshake = Handshake.None;
-            //mySerialPort.RtsEnable = true;
-            //mySerialPort.DtrEnable = true;
 
             mySerialPort.DataReceived += new SerialDataReceivedEventHandler(DataReceivedHandler);
 
@@ -67,6 +77,14 @@ namespace IoT_Dallas_of_Things_WPF
             
             //disable text-box UI in preperation for first scan
             HideElements(true);
+
+            
+            //Tuple<AppTheme, Accent> theme = ThemeManager.DetectAppStyle(Application.Current);
+            //// now change app style to the custom accent and current theme
+            //ThemeManager.ChangeAppStyle(Application.Current,
+            //                            ThemeManager.GetAccent("smartBagColorTheme"),
+            //                            theme.Item1);
+
         }
 
         private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
