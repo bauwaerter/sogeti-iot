@@ -47,9 +47,7 @@ namespace IoT_Dallas_of_Things_WPF
 
         public MainWindow()
         {
-            var port = SerialPort.GetPortNames()[0];
-            string[] ports = SerialPort.GetPortNames();
-            //var port = "COM4";
+            string port = Properties.Settings.Default.Port;
 
             mySerialPort = new SerialPort(port);
 
