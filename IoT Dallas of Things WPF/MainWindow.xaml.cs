@@ -52,10 +52,7 @@ namespace IoT_Dallas_of_Things_WPF
 
             Tuple<AppTheme, Accent> theme = ThemeManager.DetectAppStyle(Application.Current);
 
-            ThemeManager.ChangeAppStyle(Application.Current,
-                                        ThemeManager.GetAccent("smartBagColorTheme"),
-                                        theme.Item1);
-            //base.OnStartup(e);
+            ThemeManager.ChangeAppStyle(Application.Current, ThemeManager.GetAccent("smartBagColorTheme"), theme.Item1);
         }
 
         public MainWindow()
