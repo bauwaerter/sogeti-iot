@@ -49,9 +49,7 @@ namespace IoT_Dallas_of_Things_WPF
         protected void OnStartup(StartupEventArgs e)
         {
             ThemeManager.AddAccent("smartBagColorTheme", new Uri("Content\\MahApps\\smartBagColorTheme.xaml"));
-
             Tuple<AppTheme, Accent> theme = ThemeManager.DetectAppStyle(Application.Current);
-
             ThemeManager.ChangeAppStyle(Application.Current, ThemeManager.GetAccent("smartBagColorTheme"), theme.Item1);
         }
 
@@ -333,19 +331,13 @@ namespace IoT_Dallas_of_Things_WPF
             });
         }
 
-        private void onlyNumbers(object sender, TextCompositionEventArgs e)
+        private void OnlyNumbers(object sender, TextCompositionEventArgs e)
         {
             Regex regex = new Regex("[^0-9]+");
             e.Handled = regex.IsMatch(e.Text);
         }
 
-        private void onlyThreeNumbers(object sender, TextCompositionEventArgs e)
-        {
-            Regex regex = new Regex("[^0-9]+");
-            e.Handled = regex.IsMatch(e.Text);
-        }
-
-        private void onlyText(object sender, TextCompositionEventArgs e)
+        private void OnlyText(object sender, TextCompositionEventArgs e)
         {
             Regex regex = new Regex("[^a-zA-Z]+");
             e.Handled = regex.IsMatch(e.Text);
